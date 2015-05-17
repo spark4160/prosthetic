@@ -3,7 +3,9 @@
 // Methods
 void time_init(void) {
 	// Set vairables
-	ticks = 0LL;
+	ticks = 0;
+	millis_l = 0;
+	millis_h = 0;
 
 	// Registers
 	// Set up timer
@@ -19,15 +21,21 @@ void time_init(void) {
 }
 
 void time_start(void) {
-	ticks = 0LL;
+	ticks = 0;
+	millis_l = 0;
+	millis_h = 0;
 }
 
-int32_t time_ticks(void) {
+uint16_t time_ticks(void) {
 	return ticks;
 }
 
-int32_t time_ms(void) {
-	return ticks/8;
+uint16_t time_ms(void) {
+	return millis_l;
+}
+
+uint16_t time_s(void) {
+	return (millis_l/1000) + (millis_h/1000)*65536;
 }
 
 // Interrupts
@@ -38,9 +46,14 @@ ISR(TIMER2_COMPB_vect) {
 	// /32 Tick frequency is 500*10^3/256 =  1953 >   977
 	// /64 Tick frequency is 250*10^3/256 =   977 >   488
 	ticks++;
-	// Every half second
-	if(ticks%3906 == 0) {
-		// Tick on LED
-		PORTB ^= (1<<PB0);
+	// Every millisecond
+	if(ticks%8 == 0) {
+		// Add another millisecond
+		millis_l++;
+		if(millis_l == 0) {
+			// Tick on LED
+			PORTB ^= (1<<PB0);
+			millis_h++;
+		}
 	}
 }

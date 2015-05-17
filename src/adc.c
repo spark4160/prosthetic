@@ -40,59 +40,37 @@ void adc_sample(void) {
 	// Conversion complete, get reading
 	uint16_t reading = ADC;
 
-	// Remove old sample from sum
-	sum_full[sensor] -= samples[sensor][samples_indices[sensor]];
+	// Remove old reading from sum
+	sum[sensor] -= samples[sensor][samples_indices[sensor]];
 
-	// Store new sample
+	// Add new reading to sum
+	sum[sensor] += reading;
+
+	// Store new reading
 	samples[sensor][samples_indices[sensor]] = reading;
 
-	// Add new sample to sum
-	sum_full[sensor] += reading;
-
-	// Check for sparse sample
-	if(samples_count[sensor]%SPARSE_SAMPLE_INTERVAL == 0) {
-		uint16_t sparse_value = sum_full[sensor]/SAMPLE_COUNT;
-
-		// Remove old sample from sum
-		sum_sparse[sensor] -= samples_sparse[sensor][samples_sparse_indices[sensor]];
-
-		// Store new sample
-		samples_sparse[sensor][samples_sparse_indices[sensor]] = sparse_value;
-
-		// Add new sample to sum
-		sum_sparse[sensor] += sparse_value;
-
-		// Increment index
-		samples_sparse_indices[sensor]++;
-		if(samples_sparse_indices[sensor] == SPARSE_SAMPLE_COUNT) {
-			samples_sparse_indices[sensor] = 0;
-		}
-	}
-
-	// Increment indices
+	// Increment sample index
 	samples_indices[sensor]++;
 	if(samples_indices[sensor] == SAMPLE_COUNT) {
 		samples_indices[sensor] = 0;
 	}
+
+	// Go to next sensor
 	sensor++;
 	if(sensor == SENSORS) {
 		sensor = 0;
 	}
-	samples_count[sensor]++;
 
 	// Set ADCn
 	ADMUX	= (ADMUX & 0xF0) |
 	        (sensor & 0x0F);
+
 	// Start ADC
 	ADCSRA |= (1<<ADSC);
 }
 
 uint16_t adc_get(uint8_t pin){
-	// uint32_t sum = 0;
-	// for(uint8_t i = 0; i < SAMPLE_COUNT; i++) {
-	// 	sum += samples[sensor][i];
-	// }
-	return (uint16_t) sum_full[pin]/SAMPLE_COUNT;
+	return sum[pin]/SAMPLE_COUNT;
 }
 
 ISR(ADC_vect) {

@@ -1,5 +1,7 @@
 NAME=prosthetic
 INCLUDE=serial.c time.c adc.c
+EXTINCLUDE=-I/usr/include
+EXTLINK=-L/usr/lib/libfftw3.so -lfftw3
 CFLAGS=-mmcu=atmega328 -O3 -std=c99 -Wno-int-to-pointer-cast -Wno-aggressive-loop-optimizations
 PROGRAMMER=-c arduino
 FAST=-B 1
@@ -9,7 +11,7 @@ MICRO=-p ATmega328P
 
 all: o elf install
 o:
-	avr-gcc ${CFLAGS} -o ${NAME}.o ${NAME}.c ${INCLUDE}
+	avr-gcc ${CFLAGS} -o ${NAME}.o ${NAME}.c ${INCLUDE} ${EXTINCLUDE}
 elf:
 	avr-ld -mavr3 -o ${NAME}.elf ${NAME}.o
 install:

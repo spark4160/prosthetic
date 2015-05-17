@@ -9,16 +9,20 @@
 #include "adc.h"
 
 // Variables
-int32_t ticks;
+uint16_t ticks;
+uint16_t millis_l;
+uint16_t millis_h;
 
 // Methods
 void time_init(void);
 
 void time_start(void);
 
-int32_t time_ticks(void);
+uint16_t time_ticks(void);
 
-int32_t time_ms(void);
+uint16_t time_ms(void);
+
+uint16_t time_s(void);
 
 // Interrupts
 ISR(TIMER1_COMPB_vect);
